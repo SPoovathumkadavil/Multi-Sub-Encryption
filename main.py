@@ -17,7 +17,7 @@ import time
 
 
 #----------------------------------------------------------------
-# Functions
+# Sub-Functions
 #----------------------------------------------------------------
 
 def jtext(obj):
@@ -69,6 +69,29 @@ def new_keys(num: int, file_name: str=False):
     # Return the dict for further use
     return keys
 
+def encrypt(text: str, keys):
+    # makes it easier to iterate through
+    text = list(text)
+    
+    # Change for each set of keys
+    change = []
+    
+    for key in keys.values():
+        holder = []
+        
+        # Iterate through text
+        for letter in text:
+            if letter.isalpha():
+                index = ALPHA.index(letter)
+                applied_index = key.index(index)
+                holder.append(applied_index)
+            else:
+                holder.append(letter)
+
+        change.append(holder)
+    
+    print(change[len(change)])
+                
 
 #----------------------------------------------------------------
 # Main function
@@ -78,7 +101,7 @@ def main():
     # Ask for new keys
     c = False
     while not c:
-        Q_new_keys = input("Would you like to nake new keys? (y/n) ")
+        Q_new_keys = input("Would you like to make new keys? (y/n) ")
         
         if Q_new_keys.lower() == "y":
             Q_new_keys = True
@@ -110,7 +133,7 @@ def main():
             keys = new_keys(Q_num, Q_rename_file)
             
     else:
-        files = os.listdir('keys/')
+        files = os.listdir(r'keys/')
         
         # Creation times
         creation_times = []
@@ -125,11 +148,14 @@ def main():
         latest_file_index = creation_times.index(max_time)
         latest_file = files[latest_file_index]
         
-        keys = json.load("keys/"+latest_file)
+        keys = json.load(r"keys/"+latest_file)
         
         print("\nLatest key file chosen\n")
         
     # Get text
     Q_text = input("Text (symbols like '!?,.' are ignored): ")
     
+    encrypt(Q_text, keys)
     
+if __name__ == "__main__":
+    main()
