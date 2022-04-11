@@ -9,6 +9,7 @@ ALPHA = list("abcdefghijklmnopqrstuvwxyz")
 # imports
 #----------------------------------------------------------------
 
+from mimetypes import init
 import uuid
 import random
 import json
@@ -53,12 +54,10 @@ def new_keys(num: int, file_name: str=False):
     keys = {}
     
     # Iterate through times and append each random key to the keys
+    a = ALPHA
     for n in range(num):
-        a = ALPHA
         random.shuffle(a)
-
-        key = {n+1: a}
-        keys.update(key)
+        keys.update({str(n+1): a[:]})
     
     # Convert to json string
     text = jtext(keys)
@@ -71,26 +70,46 @@ def new_keys(num: int, file_name: str=False):
 
 def encrypt(text: str, keys):
     # makes it easier to iterate through
-    text = list(text)
+    text = text.lower()
     
     # Change for each set of keys
-    change = []
+    change = [text]
     
-    for key in keys.values():
-        holder = []
+    key_vals = list(keys.values())
+    
+    for key in key_vals:
+        holder = ""
         
         # Iterate through text
-        for letter in text:
+        for letter in change[key_vals.index(key)]:
             if letter.isalpha():
                 index = ALPHA.index(letter)
-                applied_index = key.index(index)
-                holder.append(applied_index)
+                applied_index = key[index]
+                holder += applied_index
             else:
-                holder.append(letter)
+                holder += letter
 
         change.append(holder)
     
-    print(change[len(change)])
+    return change.pop()
+
+def decrypt(text: str, keys):
+    # makes it easier to iterate through
+    text = text.lower()
+    
+    # Change for each set of keys
+    change = [text]
+    
+    key_vals = list(keys.values())
+    
+    for i in range(len(key_vals)):
+        c_key = key_vals[len(key_vals) - i - 1]
+        if len(key_vals) - 1 == i:
+            n_key = ALPHA
+        else:
+            n_key = key_vals[len(key_vals) - i - 2]
+            
+        
                 
 
 #----------------------------------------------------------------
@@ -98,7 +117,6 @@ def encrypt(text: str, keys):
 #----------------------------------------------------------------
 
 def main():
-    # Ask for new keys
     c = False
     while not c:
         Q_new_keys = input("Would you like to make new keys? (y/n) ")
@@ -106,7 +124,7 @@ def main():
         if Q_new_keys.lower() == "y":
             Q_new_keys = True
             c = True 
-        if Q_new_keys.lower() == "n":
+        elif Q_new_keys.lower() == "n":
             Q_new_keys = False
             c = True
 
@@ -133,7 +151,7 @@ def main():
             keys = new_keys(Q_num, Q_rename_file)
             
     else:
-        files = os.listdir(r'keys/')
+        files = os.listdir('keys/')
         
         # Creation times
         creation_times = []
@@ -142,20 +160,22 @@ def main():
             ti_c = os.path.getctime("keys/"+file)
             ti_c = time.ctime(ti_c)
             
-            creation_times.append()
+            creation_times.append(ti_c)
         
         max_time = max(creation_times)
         latest_file_index = creation_times.index(max_time)
         latest_file = files[latest_file_index]
         
-        keys = json.load(r"keys/"+latest_file)
+        keys = json.load(open("keys/"+latest_file, 'r'))
         
         print("\nLatest key file chosen\n")
         
     # Get text
     Q_text = input("Text (symbols like '!?,.' are ignored): ")
     
-    encrypt(Q_text, keys)
+    enctext = encrypt(Q_text, keys)
+    print(enctext)
+    print(decrypt(enctext, keys))
     
 if __name__ == "__main__":
     main()
