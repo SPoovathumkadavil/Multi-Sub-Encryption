@@ -9,7 +9,6 @@ ALPHA = list("abcdefghijklmnopqrstuvwxyz")
 # imports
 #----------------------------------------------------------------
 
-from mimetypes import init
 import uuid
 import random
 import json
